@@ -24,12 +24,14 @@ def import_people():
         reader = csv.DictReader(tsvfile, delimiter='\t')
         for row in reader:
             person = Person(
-                id=row['nconst'],
-                name=row['primaryName'],
-                birth_year=int(row['birthYear']) if row['birthYear'].isdigit() else None,
-                death_year=int(row['deathYear']) if row['deathYear'].isdigit() else None,
-                profession=row['primaryProfession']
-            )
+                        id=row['nconst'],
+                        name=row['primaryName'],
+                        birth_year=int(row['birthYear']) if row['birthYear'].isdigit() else None,
+                        death_year=int(row['deathYear']) if row['deathYear'].isdigit() else None,
+                        profession=row['primaryProfession']
+                    )
+
+            db.session.add(person)  # Add person to session early
 
             # Link knownForTitles
             known_titles = row['knownForTitles'].split(',') if row['knownForTitles'] != '\\N' else []
@@ -38,8 +40,6 @@ def import_people():
                 if movie:
                     person.known_for.append(movie)
 
-            db.session.merge(person)
-    db.session.commit()
 
 def run_import():
     with app.app_context():
